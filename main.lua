@@ -4,7 +4,7 @@ local mod = SafetyBombsMod
 CollectibleType.COLLECTIBLE_SAFETY_BOMBS = Isaac.GetItemIdByName("Safety Bombs")
 
 if EID then
-
+    EID:addCollectible(CollectibleType.COLLECTIBLE_SAFETY_BOMBS, "{{Bomb}} +5 Bombs#Placed bombs will not explode until the player leaves its explosion radius", "Safety Bombs")
 end
 
 local function ends_with(str, ending)
@@ -24,11 +24,10 @@ function mod:BombUpdate(bomb)
 							if not bomb:HasTearFlags(TearFlags.TEAR_BRIMSTONE_BOMB) then
 								if bomb:HasTearFlags(TearFlags.TEAR_GOLDEN_BOMB) then
 									sprite:ReplaceSpritesheet(0, "gfx/items/pick ups/bombs/costumes/safety_bombs_gold.png")
-									sprite:LoadGraphics()
 								else
 									sprite:ReplaceSpritesheet(0, "gfx/items/pick ups/bombs/costumes/safety_bombs.png")
-									sprite:LoadGraphics()
 								end
+								sprite:LoadGraphics()
 							end
 						end
 					end

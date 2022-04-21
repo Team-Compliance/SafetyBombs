@@ -7,8 +7,16 @@ if EID then
     EID:addCollectible(CollectibleType.COLLECTIBLE_SAFETY_BOMBS, "{{Bomb}} +5 Bombs#Placed bombs will not explode until the player leaves its explosion radius", "Safety Bombs")
 end
 
-local function ends_with(str, ending)
-   return ending == "" or str:sub(-#ending) == ending
+local function getBombRadiusFromDamage(damage)
+	if 175.0 <= damage then
+		return 105.0
+	else
+		if damage <= 140.0 then
+			return 75.0
+		else
+			return 90.0
+		end
+	end
 end
 
 function mod:BombUpdate(bomb)
@@ -31,12 +39,7 @@ function mod:BombUpdate(bomb)
 							end
 						end
 					end
-					
-					local bombRadius = 75
-					if ends_with(sprite:GetFilename(), "3.anm2") or bomb.Variant == BombVariant.BOMB_DECOY or bomb.Variant == BombVariant.BOMB_MR_MEGA then
-						bombRadius = 105
-					end
-					for i, player in ipairs(Isaac.FindInRadius(bomb.Position, bombRadius * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
+					for i, player in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
 						bomb:SetExplosionCountdown(45)
 						break
 					end
@@ -57,7 +60,7 @@ function mod:GetPlayerFromTear(tear)
 		elseif check.Type == EntityType.ENTITY_FAMILIAR and check.Variant == FamiliarVariant.INCUBUS then
 			local data = tear:GetData()
 			data.IsIncubusTear = true
-			return check:ToFamiliar().Player:ToPlayer()
+			return mod:GetPtrHashEntity(check:ToFamiliar().Player):ToPlayer()
 		end
 	end
 	return nil

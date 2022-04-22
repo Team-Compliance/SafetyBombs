@@ -76,31 +76,41 @@ end
 
 function mod:BombUpdate(bomb)
 	local player = GetPlayerFromTear(bomb)
+	local data = bomb:GetData()
+	
 	if player then
-		if bomb.Type == EntityType.ENTITY_BOMB then
-			if bomb.Variant ~= BombVariant.BOMB_THROWABLE then
-				if player:HasCollectible(CollectibleType.COLLECTIBLE_SAFETY_BOMBS) then
-					local sprite = bomb:GetSprite()
-					
-					if bomb.FrameCount == 1 then
-						if bomb.Variant == BombVariant.BOMB_NORMAL then
-							if not bomb:HasTearFlags(TearFlags.TEAR_BRIMSTONE_BOMB) then
-								if bomb:HasTearFlags(TearFlags.TEAR_GOLDEN_BOMB) then
-									sprite:ReplaceSpritesheet(0, "gfx/items/pick ups/bombs/costumes/safety_bombs_gold.png")
-								else
-									sprite:ReplaceSpritesheet(0, "gfx/items/pick ups/bombs/costumes/safety_bombs.png")
-								end
-								sprite:LoadGraphics()
-							end
+		if bomb.FrameCount == 0 then
+			if bomb.Type == EntityType.ENTITY_BOMB then
+				if bomb.Variant ~= BombVariant.BOMB_THROWABLE then
+					if player:HasCollectible(CollectibleType.COLLECTIBLE_SAFETY_BOMBS) then
+						if data.isSafetyBomb == nil then
+							data.isSafetyBomb = true
 						end
-					end
-					
-					for i, p in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
-						bomb:SetExplosionCountdown(45)
-						break
 					end
 				end
 			end
+		end
+	end
+	
+	if data.isSafetyBomb then
+		if bomb.FrameCount == 0 then
+			if bomb.Variant == BombVariant.BOMB_NORMAL then
+				if not bomb:HasTearFlags(TearFlags.TEAR_BRIMSTONE_BOMB) then
+					local sprite = bomb:GetSprite()
+					if bomb:HasTearFlags(TearFlags.TEAR_GOLDEN_BOMB) then
+						sprite:ReplaceSpritesheet(0, "gfx/items/pick ups/bombs/costumes/safety_bombs_gold.png")
+					else
+						sprite:ReplaceSpritesheet(0, "gfx/items/pick ups/bombs/costumes/safety_bombs.png")
+					end
+					sprite:LoadGraphics()
+				end
+			end
+		end
+		
+		for i, p in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
+			bomb:SetExplosionCountdown(30) -- temporary until we can get explosion countdown directly
+			--bomb:SetExplosionCountdown(bomb.ExplosionCountdown)
+			break
 		end
 	end
 end

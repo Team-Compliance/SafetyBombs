@@ -94,8 +94,8 @@ function mod:BombUpdate(bomb)
 							end
 						end
 					end
-
-					for i, player in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
+					
+					for i, p in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
 						bomb:SetExplosionCountdown(45)
 						break
 					end

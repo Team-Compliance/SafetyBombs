@@ -100,11 +100,9 @@ if Encyclopedia then
 	  ID = CollectibleType.COLLECTIBLE_SAFETY_BOMBS,
 	  WikiDesc = Wiki.SafetyBombs,
 	  Pools = {
-		Encyclopedia.ItemPools.POOL_ANGEL,
-		Encyclopedia.ItemPools.POOL_DEVIL,
-	  	Encyclopedia.ItemPools.POOL_LIBRARY,
-		Encyclopedia.ItemPools.POOL_GREED_ANGEL,
-		Encyclopedia.ItemPools.POOL_GREED_DEVIL,
+		Encyclopedia.ItemPools.POOL_TREASURE,
+		Encyclopedia.ItemPools.POOL_GREED_TREASURE,
+		Encyclopedia.ItemPools.POOL_BOMB_BUM,
 	  },
 	})
 end

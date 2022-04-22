@@ -17,7 +17,7 @@ local Wiki = {
     { -- Trivia
       {str = "Trivia", fsize = 2, clr = 3, halign = 0},
       {str = "This mod was coded by kittenchilly!"},
-      {str = "Book of Illusions was an unused concept from Antibirth."},
+      {str = "Safety Bombs was an unused concept from Antibirth."},
     },
   }
 }

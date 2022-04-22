@@ -79,3 +79,32 @@ function mod:GetPtrHashEntity(entity)
 	end
 	return nil
 end
+
+local Wiki = {
+  SafetyBombs = {
+    { -- Effect
+      {str = "Effect", fsize = 2, clr = 3, halign = 0},
+      {str = "+5 bombs."},
+      {str = "Placed bombs will not explode until the player leaves its explosion radius."},
+    },
+    { -- Trivia
+      {str = "Trivia", fsize = 2, clr = 3, halign = 0},
+      {str = "This mod was coded by kittenchilly!"},
+      {str = "Book of Illusions was an unused concept from Antibirth."},
+    },
+  }
+}
+
+if Encyclopedia then
+	Encyclopedia.AddItem({
+	  ID = CollectibleType.COLLECTIBLE_SAFETY_BOMBS,
+	  WikiDesc = Wiki.SafetyBombs,
+	  Pools = {
+		Encyclopedia.ItemPools.POOL_ANGEL,
+		Encyclopedia.ItemPools.POOL_DEVIL,
+	  	Encyclopedia.ItemPools.POOL_LIBRARY,
+		Encyclopedia.ItemPools.POOL_GREED_ANGEL,
+		Encyclopedia.ItemPools.POOL_GREED_DEVIL,
+	  },
+	})
+end

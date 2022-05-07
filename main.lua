@@ -117,3 +117,48 @@ function mod:BombUpdate(bomb)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, mod.BombUpdate)
+
+local function DoRenderRadar(bomb)
+	local data = bomb:GetData()
+	data.BombRadar.SafetyBombTrigger = false
+	for i, p in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
+		data.BombRadar.SafetyBombTrigger = true
+	end
+	if not Game():IsPaused() then
+		if data.BombRadar.SafetyBombTrigger then
+			if data.BombRadar.SafetyBombTransperancy < 1 then
+				data.BombRadar.SafetyBombTransperancy = data.BombRadar.SafetyBombTransperancy + 0.05
+			end
+		elseif data.BombRadar.SafetyBombTransperancy > 0 then
+			data.BombRadar.SafetyBombTransperancy = data.BombRadar.SafetyBombTransperancy - 0.05
+		end
+	end
+	if data.BombRadar.SafetyBombTransperancy > 0 then
+		if not Game():IsPaused() then
+			data.BombRadar.Sprite:Update()
+		end
+		data.BombRadar.Sprite.Color = Color(1,1,1,data.BombRadar.SafetyBombTransperancy)
+		data.BombRadar.Sprite:Render(Game():GetRoom():WorldToScreenPosition(bomb.Position))
+	elseif data.BombRadar.SafetyBombTransperancy <= 0 then
+		data.BombRadar = nil
+	end
+end
+function mod:BombRadar(bomb)
+	local data = bomb:GetData()
+	
+	if data.isSafetyBomb then
+		if not data.BombRadar then
+			data.BombRadar = {}
+			data.BombRadar.Sprite = Sprite()
+			data.BombRadar.Sprite:Load("gfx/safetybombsradar.anm2",true)
+			data.BombRadar.Sprite:Play("Idle")
+			data.BombRadar.Sprite.Scale = Vector(1.4,1.4)
+			data.BombRadar.Sprite.PlaybackSpeed = 0.4
+			data.BombRadar.SafetyBombTransperancy = 0
+			data.BombRadar.SafetyBombTrigger = false
+		else
+			DoRenderRadar(bomb)
+		end
+	end
+end
+mod:AddCallback(ModCallbacks.MC_POST_BOMB_RENDER, mod.BombRadar)

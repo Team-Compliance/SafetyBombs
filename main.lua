@@ -81,7 +81,7 @@ function mod:BombUpdate(bomb)
 	local data = bomb:GetData()
 	
 	if player then
-		if bomb.FrameCount == 0 then
+		if bomb.FrameCount == 1 then
 			if bomb.Type == EntityType.ENTITY_BOMB then
 				if bomb.Variant ~= BombVariant.BOMB_THROWABLE then
 					if player:HasCollectible(CollectibleType.COLLECTIBLE_SAFETY_BOMBS) then
@@ -95,7 +95,7 @@ function mod:BombUpdate(bomb)
 	end
 	
 	if data.isSafetyBomb then
-		if bomb.FrameCount == 0 then
+		if bomb.FrameCount == 1 then
 			if bomb.Variant == BombVariant.BOMB_NORMAL then
 				if not bomb:HasTearFlags(TearFlags.TEAR_BRIMSTONE_BOMB) then
 					local sprite = bomb:GetSprite()

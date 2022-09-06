@@ -3,10 +3,17 @@ local mod = SafetyBombsMod
 
 CollectibleType.COLLECTIBLE_SAFETY_BOMBS = Isaac.GetItemIdByName("Safety Bombs")
 
+local SafetyBombIcon = Sprite()
+SafetyBombIcon:Load("gfx/ui/minimapitems/safetybomb_icon.anm2", true)
+
 if EID then
     EID:addCollectible(CollectibleType.COLLECTIBLE_SAFETY_BOMBS, "{{Bomb}} +5 Bombs#Placed bombs will not explode until the player leaves its explosion radius", "Safety Bombs")
 	EID:addCollectible(CollectibleType.COLLECTIBLE_SAFETY_BOMBS, "{{Bomb}} +5 Bombas#Las bombas que coloques no explotarán hasta que te alejes de su radio de explosión", "Bombas de Seguridad", "spa")
 	EID:addCollectible(CollectibleType.COLLECTIBLE_SAFETY_BOMBS, "{{Bomb}} +5 бомб#Размещенные бомбы не взорвутся, пока игрок не покинет радиус взрыва", "Безопасные бомбы", "ru")
+end
+
+if MinimapAPI and MiniMapiItemsAPI then
+	MiniMapiItemsAPI:AddCollectible(CollectibleType.COLLECTIBLE_SAFETY_BOMBS, SafetyBombIcon, "CustomIcons", 0)
 end
 
 local Wiki = {
@@ -64,8 +71,12 @@ local function GetPlayerFromTear(tear)
 	return nil
 end
 
-local function getBombRadiusFromDamage(damage)
-	if 175.0 <= damage then
+local function getBombRadiusFromDamage(damage,isBomber)
+	if 300 <= damage then
+		return 300.0
+	elseif isBomber then
+		return 155.0
+	elseif 175.0 <= damage then
 		return 105.0
 	else
 		if damage <= 140.0 then
@@ -79,7 +90,8 @@ end
 function mod:BombUpdate(bomb)
 	local player = GetPlayerFromTear(bomb)
 	local data = bomb:GetData()
-	
+	local fuseCD = 30
+	local isBomber
 	if player then
 		if bomb.FrameCount == 1 then
 			if bomb.Type == EntityType.ENTITY_BOMB then
@@ -92,6 +104,10 @@ function mod:BombUpdate(bomb)
 				end
 			end
 		end
+		if player:HasTrinket(TrinketType.TRINKET_SHORT_FUSE) then
+			fuseCD = 2
+		end
+		isBomber = player:HasCollectible(CollectibleType.COLLECTIBLE_BOMBER_BOY)
 	end
 	
 	if data.isSafetyBomb then
@@ -109,8 +125,8 @@ function mod:BombUpdate(bomb)
 			end
 		end
 		
-		for i, p in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
-			bomb:SetExplosionCountdown(30) -- temporary until we can get explosion countdown directly
+		for i, p in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage,isBomber) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
+			bomb:SetExplosionCountdown(fuseCD) -- temporary until we can get explosion countdown directly
 			--bomb:SetExplosionCountdown(bomb.ExplosionCountdown)
 			break
 		end
@@ -120,8 +136,10 @@ mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, mod.BombUpdate)
 
 local function DoRenderRadar(bomb)
 	local data = bomb:GetData()
+	local player = GetPlayerFromTear(bomb)
+	local isBomber = player and player:HasCollectible(CollectibleType.COLLECTIBLE_BOMBER_BOY)
 	data.BombRadar.SafetyBombTrigger = false
-	for i, p in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
+	for i, p in ipairs(Isaac.FindInRadius(bomb.Position, getBombRadiusFromDamage(bomb.ExplosionDamage,isBomber) * bomb.RadiusMultiplier, EntityPartition.PLAYER)) do
 		data.BombRadar.SafetyBombTrigger = true
 	end
 	if not Game():IsPaused() then
@@ -148,11 +166,14 @@ function mod:BombRadar(bomb)
 	
 	if data.isSafetyBomb then
 		if not data.BombRadar then
+			local player = GetPlayerFromTear(bomb)
+			local isBomber = player and player:HasCollectible(CollectibleType.COLLECTIBLE_BOMBER_BOY)
+			local mul = getBombRadiusFromDamage(bomb.ExplosionDamage,isBomber) / 75 * bomb.RadiusMultiplier
 			data.BombRadar = {}
 			data.BombRadar.Sprite = Sprite()
 			data.BombRadar.Sprite:Load("gfx/safetybombsradar.anm2",true)
 			data.BombRadar.Sprite:Play("Idle")
-			data.BombRadar.Sprite.Scale = Vector(1.4,1.4)
+			data.BombRadar.Sprite.Scale = Vector(1.4*mul,1.4*mul)
 			data.BombRadar.Sprite.PlaybackSpeed = 0.4
 			data.BombRadar.SafetyBombTransperancy = 0
 			data.BombRadar.SafetyBombTrigger = false
